@@ -19,7 +19,6 @@ const ShowScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
-    alignItems: 'center',
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 20,
