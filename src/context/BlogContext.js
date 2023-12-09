@@ -1,5 +1,21 @@
-import React from 'react';
+import { getDocs, collection } from 'firebase/firestore';
+import db from '../api/db';
 import createDataContext from './createDataContext';
+
+const getBlogPosts = (dispatch) => {
+  return async () => {
+    const blogPosts = await getDocs(collection(db, 'blogPosts'));
+
+    const newData = blogPosts.docs.map((doc) => {
+      return {
+        ...doc.data(),
+        id: doc.id ? doc.id : Math.floor(Math.random() * 9999),
+      };
+    });
+
+    dispatch({ type: 'get_blogPosts', payload: newData });
+  };
+};
 
 const blogReducer = (state, action) => {
   switch (action.type) {
@@ -18,6 +34,8 @@ const blogReducer = (state, action) => {
       return state.map((blogPost) => {
         return blogPost.id === action.payload.id ? action.payload : blogPost;
       });
+    case 'get_blogPosts':
+      return action.payload;
     default:
       return state;
   }
@@ -55,7 +73,7 @@ const editBlogPost = (dispatch) => {
 
 export const { Context, Provider } = createDataContext(
   blogReducer,
-  { addBlogPost, deleteBlogPost, editBlogPost },
+  { addBlogPost, deleteBlogPost, editBlogPost, getBlogPosts },
   [
     {
       id: 1,
