@@ -1,4 +1,10 @@
-import { getDocs, addDoc, collection } from 'firebase/firestore';
+import {
+  getDocs,
+  addDoc,
+  deleteDoc,
+  collection,
+  doc,
+} from 'firebase/firestore';
 import db from '../api/db';
 import createDataContext from './createDataContext';
 
@@ -70,8 +76,14 @@ const addBlogPost = (dispatch) => {
 };
 
 const deleteBlogPost = (dispatch) => {
-  return (id) => {
-    dispatch({ type: 'delete_blogPost', payload: id });
+  return async (id) => {
+    try {
+      await deleteDoc(doc(db, 'blogPosts', id.toString()));
+      dispatch({ type: 'delete_blogPost', payload: id });
+    } catch (e) {
+      console.log('There was an error.');
+      console.log(e);
+    }
   };
 };
 
