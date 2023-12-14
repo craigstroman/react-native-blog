@@ -1,21 +1,6 @@
-import { getDocs, collection } from 'firebase/firestore';
+import { getDocs, addDoc, collection } from 'firebase/firestore';
 import db from '../api/db';
 import createDataContext from './createDataContext';
-
-const getBlogPosts = (dispatch) => {
-  return async () => {
-    const blogPosts = await getDocs(collection(db, 'blogPosts'));
-
-    const newData = blogPosts.docs.map((doc) => {
-      return {
-        ...doc.data(),
-        id: doc.id ? doc.id : Math.floor(Math.random() * 9999),
-      };
-    });
-
-    dispatch({ type: 'get_blogPosts', payload: newData });
-  };
-};
 
 const blogReducer = (state, action) => {
   switch (action.type) {
@@ -23,7 +8,7 @@ const blogReducer = (state, action) => {
       return [
         ...state,
         {
-          id: Math.floor(Math.random() * 9999),
+          id: action.payload.id,
           title: action.payload.title,
           content: action.payload.content,
         },
@@ -41,15 +26,43 @@ const blogReducer = (state, action) => {
   }
 };
 
+const getBlogPosts = (dispatch) => {
+  return async () => {
+    const blogPosts = await getDocs(collection(db, 'blogPosts'));
+
+    const newData = blogPosts.docs.map((doc) => {
+      return {
+        ...doc.data(),
+        id: doc.id ? doc.id : Math.floor(Math.random() * 9999),
+      };
+    });
+
+    dispatch({ type: 'get_blogPosts', payload: newData });
+  };
+};
+
 const addBlogPost = (dispatch) => {
-  return (title, content, callback) => {
-    dispatch({
-      type: 'add_blogPost',
-      payload: {
+  return async (title, content, callback) => {
+    try {
+      const docRef = await addDoc(collection(db, 'blogPosts'), {
         title,
         content,
-      },
-    });
+      });
+
+      dispatch({
+        type: 'add_blogPost',
+        payload: {
+          title,
+          content,
+          id: docRef.id,
+        },
+      });
+
+      console.log('Document written with ID: ', docRef.id);
+    } catch (e) {
+      console.log('There was an error.');
+      console.log(e);
+    }
     if (callback) {
       callback();
     }
