@@ -2,6 +2,7 @@ import {
   getDocs,
   addDoc,
   deleteDoc,
+  updateDoc,
   collection,
   doc,
 } from 'firebase/firestore';
@@ -88,8 +89,18 @@ const deleteBlogPost = (dispatch) => {
 };
 
 const editBlogPost = (dispatch) => {
-  return (id, title, content, callback) => {
-    dispatch({ type: 'edit_blogPost', payload: { id, title, content } });
+  return async (id, title, content, callback) => {
+    try {
+      await updateDoc(doc(db, 'blogPosts', id), {
+        title,
+        content,
+      });
+      dispatch({ type: 'edit_blogPost', payload: { id, title, content } });
+    } catch (e) {
+      console.log('There was an error.');
+      console.log(e);
+    }
+
     if (callback) {
       callback();
     }
